@@ -5,7 +5,7 @@ from itertools import product
 
 # extract CLT list from excel
 
-CLT_table_columns = ['naam', 'merk', 'Nummer', 'lagen', 'dikte', 'gewicht', 'D11', 'D22']
+CLT_table_columns = ['naam', 'merk', 'Nummer', 'lagen', 'dikte', 'gewicht', 'D11', 'D22', 'D44']
 CLT_table = pd.read_excel('Vloertrilling_prEN_SBR_EC5_17102023.xlsx', sheet_name='Tabel_CLT', usecols=CLT_table_columns)
 Derix_CLT_table = CLT_table[CLT_table['merk'] == 'Derix']
 
@@ -26,6 +26,7 @@ database_full = pd.merge(database, Derix_CLT_table, how = 'inner', on = ['Nummer
 
 # cull database based on ULS check
 bending_strength = 1.15 * 0.8 * 24 / 1.25 # k_sys * k_mod * f_m,xlay,k / gamma_m
+shear_strength = 0.8 * 4 / 1.25 # k_mod * f_v,090,ylay,k / gamma_m
 
 def calculate_bending_unity_check(row):
     load = (1.35 * (row['gewicht'] + row['permanent_load']) + 1.5 * row['variable_load']) * 0.0098 # [kN/m]
@@ -40,5 +41,3 @@ database_full['unity_check_bending'] = database_full.apply(calculate_bending_uni
 
 unity_check_limit = 1
 filtered_database_full = database_full[database_full['unity_check_bending'] < unity_check_limit]
-
-
