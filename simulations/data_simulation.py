@@ -6,7 +6,7 @@ from itertools import product
 # extract CLT list from excel
 
 CLT_table_columns = ['naam', 'merk', 'Nummer', 'lagen', 'dikte', 'gewicht', 'D11', 'D22', 'D44']
-CLT_table = pd.read_excel('Vloertrilling_prEN_SBR_EC5_17102023.xlsx', sheet_name='Tabel_CLT', usecols=CLT_table_columns)
+CLT_table = pd.read_excel('Vloertrilling_prEN_SBR_EC5_17102023.xlsx', sheet_name = 'Tabel_CLT', usecols = CLT_table_columns)
 Derix_CLT_table = CLT_table[CLT_table['merk'] == 'Derix']
 
 
