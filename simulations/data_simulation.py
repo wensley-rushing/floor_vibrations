@@ -21,7 +21,24 @@ parameters = {
 
 all_combinations = list(product(*[np.linspace(param['min'], param['max'], int((param['max'] - param['min']) / param['step']) + 1) for param in parameters.values()]))
 
-database = pd.DataFrame(all_combinations, columns=parameters.keys())
-database_full = pd.merge(database, Derix_CLT_table, how='inner', on = ['Nummer'])
+database = pd.DataFrame(all_combinations, columns = parameters.keys())
+database_full = pd.merge(database, Derix_CLT_table, how = 'inner', on = ['Nummer'])
 
 # cull database based on ULS check
+bending_strength = 1.15 * 0.8 * 24 / 1.25 # k_sys * k_mod * f_m,xlay,k / gamma_m
+
+def calculate_bending_unity_check(row):
+    load = (1.35 * (row['gewicht'] + row['permanent_load']) + 1.5 * row['variable_load']) * 0.0098 # [kN/m]
+    moment = load * row['floor_span'] ** 2 / 8 # [kNm]
+    section_modulus = 2 * (row['D11'] * 1000 / 12000) / row['dikte'] # m**3
+    stress = moment / section_modulus # [kN/m]
+    unity_check = stress / bending_strength
+
+    return unity_check
+
+database_full['unity_check_bending'] = database_full.apply(calculate_bending_unity_check, axis = 1)
+
+unity_check_limit = 1
+filtered_database_full = database_full[database_full['unity_check_bending'] < unity_check_limit]
+
+
