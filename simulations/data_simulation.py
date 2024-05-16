@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+import math
 from itertools import product
 
 
@@ -9,8 +10,6 @@ CLT_table_columns = ['naam', 'merk', 'Nummer', 'lagen', 'dikte', 'gewicht', 'D11
 CLT_table = pd.read_excel('Vloertrilling_prEN_SBR_EC5_17102023.xlsx', sheet_name = 'Tabel_CLT', usecols = CLT_table_columns)
 Derix_CLT_table = CLT_table[CLT_table['merk'] == 'Derix']
 
-# define damping value
-damping = 0.025
 
 # Create database parameters
 parameters = {
@@ -43,3 +42,46 @@ database_full['unity_check_bending'] = database_full.apply(calculate_bending_uni
 
 unity_check_limit = 1
 filtered_database_full = database_full[database_full['unity_check_bending'] < unity_check_limit]
+
+# ANALYTICAL FORMULATIONS FOR MODAL PROPERTIES
+
+# set definition floors
+floor_span = 'one-way'
+
+def define_damping:
+    damping = 0.025 # as defined in prEN for CLT floors
+
+    return damping
+
+def calculate_frequency(row):
+    k_e_1 = 1.0
+    if floor_span == 'one-way':
+        k_e_2 = 1.0
+    if floor_span == 'two-way':
+        k_e_2 = math.sqrt(1 + ((((row['floor_span']) / (row['floor_width']))**4 * (row['D22'])) / (row['D11'])))
+    else:
+        k_e_2 = 1000
+    mass = (row['gewicht'] + row['permanent_load'] + 0.1 * row['variable_load'])
+    frequency = k_e_1 * k_e_2 * (math.pi / (2 * (row['floor_span'])**2)) * math.sqrt(row['D11'] / mass)
+
+    return frequency
+
+def calculate_modal_mass(row):
+    mass = (row['gewicht'] + row['permanent_load'] + 0.1 * row['variable_load'])
+
+    if floor_span == 'one-way':
+        modal_mass = (mass * row['floor_span'] * row['floor_width']) / 2
+
+    if floor_span == 'one-way':
+        modal_mass = (mass * row['floor_span'] * row['floor_width']) / 4
+
+    else:
+        modal_mass = 0
+
+    return modal_mass
+
+
+
+
+
+
