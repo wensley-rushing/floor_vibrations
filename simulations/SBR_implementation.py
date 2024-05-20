@@ -62,6 +62,8 @@ for index, row in filtered_database_full_copy.iterrows():
 
 filtered_database_full_copy['response_class'] = response_class_list
 
+print(filtered_database_full_copy)
+
 
 #colors = {'A': 'red', 'B': 'blue', 'C': 'green', 'D': 'orange', 'E': 'purple', 'F': 'black'}
 
