@@ -87,8 +87,13 @@ database_full['unity_check_bending'] = database_full.apply(calculate_bending_uni
 bending_unity_check_limit = 1
 filtered_database_full = database_full[database_full['unity_check_bending'] < bending_unity_check_limit]
 
-natural_frequency_limit = 4.5
-filtered_database_full = database_full[database_full['natural_frequency'] > natural_frequency_limit]
+#natural_frequency_min_limit = 4.5
+#filtered_database_full = database_full[database_full['natural_frequency'] > natural_frequency_min_limit]
+
+filtered_database_full = filtered_database_full[(filtered_database_full['natural_frequency'] >= 4.5) & (filtered_database_full['natural_frequency'] <= 20)]
+
+#natural_frequency_max_limit = 20
+#filtered_database_full = database_full[database_full['natural_frequency'] < natural_frequency_max_limit]
 
 
 
