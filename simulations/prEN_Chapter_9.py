@@ -51,14 +51,39 @@ def prEN_stiffness(row):
 filtered_database_full_prEN_ch9['w_1kN'] = filtered_database_full_prEN_ch9.apply(prEN_stiffness, axis = 1)
 
 comfort_limits = {
-    'R_min': [0.0, 4.0, 8.0, 12.0, 24.0, 36.0, 48.0],
-    'high_lim': [4.0, 8.0, 12.0, 24.0, 36.0, 48.0, 1000.0],
+    'R_min_lim': [0.0, 4.0, 8.0, 12.0, 24.0, 36.0, 48.0],
+    'R_max_lim': [4.0, 8.0, 12.0, 24.0, 36.0, 48.0, 1000.0],
     'w_lim_max': [0.25, 0.25, 0.5, 1.0, 1.5, 2.0, 2.0]
 }
 
 response_classes = ['I', 'II', 'III', 'IV', 'V', 'VI', 'X']
 
 prEN_limits = pd.DataFrame(comfort_limits, index = response_classes)
+
+prEN_comfort_class = []
+
+for index, row in filtered_database_full_prEN_ch9.iterrows():
+    R_value = row['R_gov']
+    comfort_class = None
+    for cls, limits in prEN_limits.iterrows():
+        low_lim = limits['R_min_lim']
+        high_lim = limits['R_max_lim']
+        if low_lim <= R_value < high_lim:
+            comfort_class = cls
+            break
+    prEN_comfort_class.append(comfort_class)
+
+filtered_database_full_prEN_ch9['comfort_class'] = prEN_comfort_class
+
+print(prEN_limits)
+print(filtered_database_full_prEN_ch9)
+
+
+
+
+
+
+
 
 
 

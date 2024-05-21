@@ -45,6 +45,8 @@ response_classes = ['A', 'B', 'C', 'D', 'E', 'F']
 
 SBR_limits = pd.DataFrame(ES_RMS_limits, index = response_classes)
 
+print(SBR_limits)
+
 response_class_list = []
 
 for index, row in filtered_database_full_copy.iterrows():
