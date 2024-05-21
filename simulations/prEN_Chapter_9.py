@@ -28,11 +28,39 @@ def prEN_velocity(row):
 
     return R_v_rms
 
+filtered_database_full_prEN_ch9['R_a_rms'] = filtered_database_full_prEN_ch9.apply(prEN_acceleration, axis = 1)
+filtered_database_full_prEN_ch9['R_v_rms'] = filtered_database_full_prEN_ch9.apply(prEN_velocity, axis = 1)
+
+def govenring_R(row):
+    if row['natural_frequency'] < 8: #DEFINE WALKING FREQUENCY AS 2 Hz
+        R_gov = max(row['R_v_rms'], row['R_a_rms'])
+
+    else:
+        R_gov = row['R_v_rms']
+
+    return R_gov
+
+filtered_database_full_prEN_ch9['R_gov'] = filtered_database_full_prEN_ch9.apply(govenring_R, axis = 1)
+
 def prEN_stiffness(row):
     b_ef = min((0.95 * row['floor_span'] * (row['D22'] / row['D11'])**0.25), row['floor_width'])
-    w_1kN = row['floor_span'] / (48 * row['D11'] * b_ef)
+    w_1kN = row['floor_span'] / (48 * row['D11'] * b_ef) * 1000 # output in mm
 
     return w_1kN
+
+filtered_database_full_prEN_ch9['w_1kN'] = filtered_database_full_prEN_ch9.apply(prEN_stiffness, axis = 1)
+
+comfort_limits = {
+    'R_min': [0.0, 4.0, 8.0, 12.0, 24.0, 36.0, 48.0],
+    'high_lim': [4.0, 8.0, 12.0, 24.0, 36.0, 48.0, 1000.0],
+    'w_lim_max': [0.25, 0.25, 0.5, 1.0, 1.5, 2.0, 2.0]
+}
+
+response_classes = ['I', 'II', 'III', 'IV', 'V', 'VI', 'X']
+
+prEN_limits = pd.DataFrame(comfort_limits, index = response_classes)
+
+
 
 
 
