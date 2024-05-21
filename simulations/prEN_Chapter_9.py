@@ -44,7 +44,7 @@ filtered_database_full_prEN_ch9['R_gov'] = filtered_database_full_prEN_ch9.apply
 
 def prEN_stiffness(row):
     b_ef = min((0.95 * row['floor_span'] * (row['D22'] / row['D11'])**0.25), row['floor_width'])
-    w_1kN = row['floor_span'] / (48 * row['D11'] * b_ef) * 1000 # output in mm
+    w_1kN = 1000 * (row['floor_span'] * 1000)**3 / (48 * row['D11']* 10**9 * b_ef) # output in mm
 
     return w_1kN
 
@@ -75,8 +75,20 @@ for index, row in filtered_database_full_prEN_ch9.iterrows():
 
 filtered_database_full_prEN_ch9['comfort_class'] = prEN_comfort_class
 
-print(prEN_limits)
+def check_stiffness_criteria(row, limits):
+    comfort_class = row['comfort_class']
+    if comfort_class in limits.index:
+        limits = limits.loc[comfort_class]
+        if row['w_1kN'] < limits['w_lim_max']:
+            return True
+        else:
+            return False
+
+
+# Apply the function to each row in df1 and store the result
+filtered_database_full_prEN_ch9['within_limits'] = filtered_database_full_prEN_ch9.apply(lambda row: check_stiffness_criteria(row, prEN_limits), axis=1)
 print(filtered_database_full_prEN_ch9)
+
 
 
 
