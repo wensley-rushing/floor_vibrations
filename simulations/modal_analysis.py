@@ -67,6 +67,9 @@ def model_one_panel(node_coords, elements, E_longitudinal, E_transverse, mass):
     # define section properties # CHECK IF THIS IS CORRECTLY DEFINED
     ops.section('ElasticOrthotropic', 1, E1 = E_longitudinal, E2 = E_transverse, nu12 = nu, G12 = 0.0, rho = mass)
 
+    # define elements
+    for ele in elements:
+        ops.element('ShellMITC4', ele[0], ele[1], ele[2], ele[3], ele[4], 1)
 
 
 
