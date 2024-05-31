@@ -9,9 +9,11 @@ from prEN_Chapter_9 import filtered_database_full_prEN_ch9 as data
 tolerance = 1e-9
 
 # Filter data for different panel configurations
-data_two_panels = data[np.isclose(data['floor_width'], 5.4, atol=tolerance)]
-data_three_panels = data[np.isclose(data['floor_width'], 8.1, atol=tolerance)]
-data_four_panels = data[np.isclose(data['floor_width'], 10.8, atol=tolerance)]
+# data_two_panels = data[np.isclose(data['floor_width'], 5.4, atol=tolerance)]
+# data_three_panels = data[np.isclose(data['floor_width'], 8.1, atol=tolerance)]
+# data_four_panels = data[np.isclose(data['floor_width'], 10.8, atol=tolerance)]
+
+
 data_one_panel = data[np.isclose(data['floor_width'], 2.7, atol=tolerance)]
 
 # Initialize lists for node coordinates and elements
@@ -23,13 +25,14 @@ for index, row in data_one_panel.iterrows():
     floor_span = row['floor_span']
     floor_width = row['floor_width']
 
-    node1 = (1 + index * 4, 0.0, 0.0)
-    node2 = (2 + index * 4, floor_span, 0.0)
-    node3 = (3 + index * 4, 0.0, floor_width)
-    node4 = (4 + index * 4, floor_span, floor_width)
+    node1 = (1, 0.0, 0.0)
+    node2 = (2, floor_span, 0.0)
+    node3 = (3, 0.0, floor_width)
+    node4 = (4, floor_span, floor_width)
 
     node_coords_list1.append([node1, node2, node3, node4])
-    element_list1.append([1 + index, 1 + index * 4, 2 + index * 4, 4 + index * 4, 3 + index * 4])
+    element1 = 1
+    element_list1.append(element1)
 
 node_coords1 = pd.DataFrame({'node_coords': node_coords_list1})
 elements1 = pd.DataFrame({'elements': element_list1})
@@ -37,21 +40,23 @@ elements1 = pd.DataFrame({'elements': element_list1})
 # Combine node coordinates and elements with the input data
 one_panel_input_coords = pd.concat([data_one_panel.reset_index(drop=True), node_coords1], axis=1)
 one_panel_input = pd.concat([one_panel_input_coords, elements1], axis=1)
+dummy_input = one_panel_input.iloc[:1]
 
-# Calculate the acting mass for each row in the data
+
 def calculation_mass(row):
     mass = (row['gewicht'] + row['permanent_load'] + 0.1 * row['variable_load'])
     return mass
 
-# Calculate equivalent Young's modulus from effective bending stiffness and thickness
-def compute_equivalent_EI(EI, thickness):
-    E = (EI * 12) / (thickness ** 3)
+def compute_equivalent_E(EI, thickness): # in N/mm**2
+    E = (EI * 12) / (thickness ** 3) * 1000000
     return E
 
 # Apply mass and equivalent modulus calculations to the data
 one_panel_input['acting_mass'] = one_panel_input.apply(calculation_mass, axis=1)
-one_panel_input['E_longitudinal'] = one_panel_input.apply(lambda row: compute_equivalent_EI(row['D11'], row['dikte']), axis=1)
-one_panel_input['E_transverse'] = one_panel_input.apply(lambda row: compute_equivalent_EI(row['D22'], row['dikte']), axis=1)
+one_panel_input['E_longitudinal'] = one_panel_input.apply(lambda row: compute_equivalent_E(row['D11'], row['dikte']), axis=1)
+one_panel_input['E_transverse'] = one_panel_input.apply(lambda row: compute_equivalent_E(row['D22'], row['dikte']), axis=1)
+
+print(one_panel_input)
 
 # Define the function to create and analyze the model
 def model_one_panel(node_coords, elements, E_longitudinal, E_transverse, thickness, mass_per_area, nu=0.2):
@@ -66,9 +71,10 @@ def model_one_panel(node_coords, elements, E_longitudinal, E_transverse, thickne
         if node[2] == 0.0 or node[2] == floor_width:
             ops.fix(node[0], 1, 1, 1, 0, 0, 0)
 
+    ##LOOK INTO THIS
     Gxy = 0.5 * (E_longitudinal + E_transverse) / (1 + nu)
-    Gyz = Gzx = Gxy  # Assuming isotropic shear modulus for simplicity
-    Ez = 1e-6 * min(E_longitudinal, E_transverse)  # A small value for Ez as it's 2D
+    Gyz = Gzx = Gxy
+    Ez = 1e-6 * min(E_longitudinal, E_transverse)
     vyz = vzx = nu
 
     ops.nDMaterial('ElasticOrthotropic', 1, E_longitudinal, E_transverse, Ez, nu, vyz, vzx, Gxy, Gyz, Gzx, mass_per_area)
