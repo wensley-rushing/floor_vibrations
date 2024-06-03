@@ -72,6 +72,7 @@ def model_one_panel(node_coords, elements, E_longitudinal, E_transverse, thickne
     print("Node coordinates:", node_coords)
 
     # Define line supports (simply supported slab along width)
+    # I AM SURE THIS IS WHERE IS GOING WRONG, IT IS CURRENTLY NOT POSSIBLE TO DEFINE LINE SUPPORTS ONLY WITH THE 4 NODES COORDINATES
     floor_width = max(node[2] for node in node_coords)
     for node in node_coords:
         x, y = node[1], node[2]
