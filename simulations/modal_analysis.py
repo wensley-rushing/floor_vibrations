@@ -57,7 +57,6 @@ one_panel_input['E_transverse'] = one_panel_input.apply(lambda row: compute_equi
 # Select a subset of the data for testing
 dummy_input = one_panel_input.iloc[:1]
 
-print(one_panel_input)
 
 
 # Function to create and analyze the model
