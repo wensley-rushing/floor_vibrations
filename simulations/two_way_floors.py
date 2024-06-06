@@ -61,7 +61,7 @@ def f_lit(plate,L,B,m=1,n=1):
     p = plate.rho
     
     Dx = EIx / (1-vx*vy) 
-    Dy = EIy / (1-vx*vy) 
+    Dy = EIy / (1-vx*vy)
     Dk =  EIy / (2*(1+vx))
     DXY = EIx * vy + 2*Dk
     
@@ -91,9 +91,9 @@ def f_lit2(plate,L,B,m=1,n=1):
 def w(Amm,m,n,x,y,L,B):
     return np.sin(m*np.pi * x/ L) * np.sin(n*np.pi * y/ B)
 
-def opensees(plate,L,B,mesh_size = 1.0,plate_width = -1,shell=True,output = False,torsion_reduction_factor=1):
+def opensees(plate,L,B,mesh_size = 1.0,plate_width = -1,shell=True,output = True,torsion_reduction_factor=1):
         
-    div = plate_width 
+    div = plate_width
     
     if div <=0:
         div = -1
@@ -205,7 +205,7 @@ def opensees(plate,L,B,mesh_size = 1.0,plate_width = -1,shell=True,output = Fals
             if div > 0 and nodes[_nodes[0]][1] % div < 1e-5 and nodes[_nodes[0]][1] > 0:
                 
                 # add nodes
-                
+
                 n1 = int(_nodes[0])
                 n2 = int(_nodes[1])
                 
@@ -506,4 +506,3 @@ ax.plot(B_r, f_r,"-o",ms=5,c="olive", label= "opensees plate width 3m 100% torsi
 ax.set_title(f"L= {L}m, EIy/EIx {plate.EIy/plate.EIx:0.3f}")
 ax.set_xlabel("Plate width \"B\"")
 ax.legend()
-
