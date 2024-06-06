@@ -43,9 +43,9 @@ def model_two_way(floor_span, floor_width, thickness, mass_per_area, mesh_size=0
 
         mid = int(all_nodes[int(len(all_nodes) / 2)])
 
-        if output:
-            print('Mid plate point:')
-            print(xx.flatten()[mid-1], yy.flatten()[mid-1])
+        # if output:
+        #     print('Mid plate point:')
+        #     print(xx.flatten()[mid-1], yy.flatten()[mid-1])
 
         l_b = nums[:-1, :-1]
         r_b = nums[:-1, 1:]
@@ -151,10 +151,10 @@ def model_two_way(floor_span, floor_width, thickness, mass_per_area, mesh_size=0
         mass_dist = np.array([masses[a] for a in node_nums])
         modal_masses_percentage = dict()
 
-        if output:
-            print('\tMode\tFreq\tMass Percentage')
+        # if output:
+        #     print('\tMode\tFreq\tMass Percentage')
 
-        fig, axes = plt.subplots(1, numEigen, figsize=(20, 4))
+        # fig, axes = plt.subplots(1, numEigen, figsize=(20, 4))
         if numEigen == 1:
             axes = [axes]
 
@@ -165,18 +165,18 @@ def model_two_way(floor_span, floor_width, thickness, mass_per_area, mesh_size=0
 
             modal_masses_percentage[i] = np.sum(ev_data ** 2 * mass_dist) / np.sum(mass_dist)
 
-            if output:
-                print(f'\t{i:5}\t{freqs[i]:5.2f}\t{modal_masses_percentage[i] * 100:5.1f}%')
+            # if output:
+            #     print(f'\t{i:5}\t{freqs[i]:5.2f}\t{modal_masses_percentage[i] * 100:5.1f}%')
 
             # Plot mode shape
-            c = axes[i].contourf(xx, yy, zz)
-            axes[i].set_title(f'Mode {i + 1}')
-            axes[i].set_xlabel('X Position')
-            axes[i].set_ylabel('Y Position')
-            fig.colorbar(c, ax=axes[i], orientation='vertical', label='Displacement')
+            # c = axes[i].contourf(xx, yy, zz)
+            # axes[i].set_title(f'Mode {i + 1}')
+            # axes[i].set_xlabel('X Position')
+            # axes[i].set_ylabel('Y Position')
+            # fig.colorbar(c, ax=axes[i], orientation='vertical', label='Displacement')
 
-        plt.tight_layout()
-        plt.show()
+        # plt.tight_layout()
+        # plt.show()
 
         return freqs, modal_masses_percentage
 
@@ -188,27 +188,37 @@ def model_two_way(floor_span, floor_width, thickness, mass_per_area, mesh_size=0
         return None, None
 
 # Iterate over the dummy data and apply the model
-for index, row in dummy_data.iterrows():
+# for index, row in dummy_data.iterrows():
+#    floor_span = row['floor_span']
+#    floor_width = row['floor_width']
+#    thickness = row['dikte']
+#    mass_per_area = row['acting_mass']
+#
+#    frequencies, modal_masses = model_two_way(floor_span, floor_width, thickness, mass_per_area, output=True)
+#    if frequencies is not None and modal_masses is not None:
+#        for mode in range(len(frequencies)):
+#            print(f"Mode {mode + 1}: Frequency = {frequencies[mode]:.2f} Hz, Modal Mass = {modal_masses[mode] * 100:.1f}%")
+
+freq_lists = []
+mass_lists = []
+
+for index, row in data.iterrows():
     floor_span = row['floor_span']
     floor_width = row['floor_width']
     thickness = row['dikte']
     mass_per_area = row['acting_mass']
 
+    print(row.index)
+
     frequencies, modal_masses = model_two_way(floor_span, floor_width, thickness, mass_per_area, output=True)
     if frequencies is not None and modal_masses is not None:
+        freq_lists.append(frequencies.tolist())
+        mass_lists.append(list(modal_masses.values()))
+
         for mode in range(len(frequencies)):
             print(f"Mode {mode + 1}: Frequency = {frequencies[mode]:.2f} Hz, Modal Mass = {modal_masses[mode] * 100:.1f}%")
 
-for index, row in dummy_data.iterrows():
-    floor_span = row['floor_span']
-    floor_width = row['floor_width']
-    thickness = row['dikte']
-    mass_per_area = row['acting_mass']
+# Append the lists to the DataFrame
+data['frequencies'] = freq_lists
+data['modal_masses'] = mass_lists
 
-    frequencies, modal_masses = model_two_way(floor_span, floor_width, thickness, mass_per_area, output=True)
-    if frequencies is not None and modal_masses is not None:
-        for mode in range(len(frequencies)):
-            dummy_data.at[index, f"freq_{mode+1}"] = frequencies[mode]
-            dummy_data.at[index, f"mmass_{mode+1}"] = modal_masses[mode]
-
-print(dummy_data)
