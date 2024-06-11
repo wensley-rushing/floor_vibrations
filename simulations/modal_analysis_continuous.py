@@ -18,7 +18,7 @@ data['acting_mass'] = data.apply(calculation_mass, axis=1)
 data['E_longitudinal'] = data.apply(lambda row: compute_equivalent_E(row['D11'], row['dikte']), axis=1)
 data['E_transverse'] = data.apply(lambda row: compute_equivalent_E(row['D22'], row['dikte']), axis=1)
 
-dummy_data = data.iloc[:1]
+dummy_data = data.iloc[25:26]
 print(dummy_data)
 
 def model_two_way(floor_span, floor_width, thickness, mass_per_area, mesh_size=0.9, shell=True, output=False):
@@ -202,7 +202,7 @@ def model_two_way(floor_span, floor_width, thickness, mass_per_area, mesh_size=0
 freq_lists = []
 mass_lists = []
 
-for index, row in data.iterrows():
+for index, row in dummy_data.iterrows():
     floor_span = row['floor_span']
     floor_width = row['floor_width']
     thickness = row['dikte']
@@ -219,6 +219,8 @@ for index, row in data.iterrows():
             print(f"Mode {mode + 1}: Frequency = {frequencies[mode]:.2f} Hz, Modal Mass = {modal_masses[mode] * 100:.1f}%")
 
 # Append the lists to the DataFrame
-data['frequencies'] = freq_lists
-data['modal_masses'] = mass_lists
+dummy_data['frequencies'] = freq_lists
+dummy_data['modal_masses'] = mass_lists
+
+print(dummy_data)
 
