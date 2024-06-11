@@ -131,6 +131,8 @@ def calculated_a_rms(df, column_name_1, column_name_2, column_name_3):
                     else:
                         k_DLF = float('inf')
 
+                    print(k_DLF)
+
                     damping_ratio = 2
                     F_har = k_DLF * 700 # assume weight of the walker as 700 N
 
@@ -155,6 +157,9 @@ def calculated_a_rms(df, column_name_1, column_name_2, column_name_3):
 
                         accumulated_a_imag_h += a_imag_h_m
 
+                    print(accumulated_a_real_h)
+                    print(accumulated_a_imag_h)
+
                     a_h = np.sqrt(accumulated_a_real_h**2 + accumulated_a_imag_h**2)
 
                     if a_h > max_a_h:
@@ -167,6 +172,8 @@ def calculated_a_rms(df, column_name_1, column_name_2, column_name_3):
     df['a_rms'] = a_rms_values
 
     return df
+
+    # WORKING, BUT OUTPUT IS WRONG
 
 df_transient = calculated_a_rms(dummy_data_copy, 'frequencies', 'modal_masses', 'floor_span')
 
