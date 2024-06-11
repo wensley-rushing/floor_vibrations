@@ -26,11 +26,9 @@ dummy_data_copy = copy.deepcopy(dummy_data)
 # G.4 Transient response
 # (1) All modes with frequencies up to twice the floor fundamental frequency or 25 Hz (whichever is lower) should be calculated, to obtain the modal mass, stiffness and frequency
 
-print(dummy_data_copy)
-
 def calculated_v_rms(df, column_name_1, column_name_2):
     if column_name_1 not in df.columns or column_name_2 not in df.columns:
-        raise ValueError(f"column '{column_name}' does not exist in the Dataframe")
+        raise ValueError(f"Column '{column_name_1}' or '{column_name_2}' does not exist in the DataFrame")
 
     v_rms_values = []
 
@@ -76,7 +74,14 @@ def calculated_v_rms(df, column_name_1, column_name_2):
 
 df_transient = calculated_v_rms(dummy_data_copy, 'frequencies', 'modal_masses')
 
-print(df_transient)
+# G.5 Resonant response
+# (1) All modes with frequencies up to 15 Hz should be calculated to obtain modal mass, stiffness and frequency
+# (9) The process outline in this section should be repeated for all possible walking frequencies
+
+possible_walking_frequencies = [round(x,2) for x in list((i * 0.1) + 1.5 for i in range(int((2 - 1.5) / 0.1 +1)))]
+
+
+
 
 
 
