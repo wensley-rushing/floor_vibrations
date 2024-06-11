@@ -1,6 +1,9 @@
 import pandas as pd
 import numpy as np
+import copy
 from modal_analysis_continuous import dummy_data
+
+dummy_data_copy = copy.deepcopy(dummy_data)
 
 # IMPLEMENTATION OF THE ANNEX ON 'ALTERNATIVE METHOD FOR VIBRATION ANALYSIS OF FLOORS' BASED ON DOCUMENT DATE: 2023-09-26
 
@@ -23,11 +26,13 @@ from modal_analysis_continuous import dummy_data
 # G.4 Transient response
 # (1) All modes with frequencies up to twice the floor fundamental frequency or 25 Hz (whichever is lower) should be calculated, to obtain the modal mass, stiffness and frequency
 
-print(dummy_data)
+print(dummy_data_copy)
 
 def calculated_v_rms(df, column_name_1, column_name_2):
     if column_name_1 not in df.columns or column_name_2 not in df.columns:
         raise ValueError(f"column '{column_name}' does not exist in the Dataframe")
+
+    v_rms_values = []
 
     for index, row in df.iterrows():
         list_in_row_1 = row[column_name_1]
@@ -36,7 +41,7 @@ def calculated_v_rms(df, column_name_1, column_name_2):
         if isinstance(list_in_row_1, list) and isinstance(list_in_row_2, list) and len(list_in_row_1) == len(list_in_row_2):
 
             if not list_in_row_1:
-                df.at[index, column_name_1] = None
+                v_rms_values.append(None)
                 continue
 
             threshold = min (list_in_row_1[0], 25) # refer to G.4 (1)
@@ -46,10 +51,11 @@ def calculated_v_rms(df, column_name_1, column_name_2):
             filtered_list_2 = [list_in_row_2[i] for i in filtered_indices]
 
             if not filtered_list_1:
-                df.loc[index, column_name_1] = None
+                v_rms_values.append(None)
                 continue
 
             walking_frequency = 2 # refer to G.3 (4)
+            damping_ratio = 2 # assumption
 
 
             I_mod_ef = [(54 * walking_frequency**1.43) / element**1.3 for element in filtered_list_1]
@@ -58,11 +64,17 @@ def calculated_v_rms(df, column_name_1, column_name_2):
 
             highest = max(v_m_peak)
 
-            df.loc[index, column_name_1] = [highest]
+            v_rms_values.append(highest)
 
-        return df
+        #     STILL NEED TO IMPLEMENT v_rms!!!!!
 
-df_transient = calculated_v_rms(dummy_data, 'frequencies', 'modal_masses')
+        else:
+            v_rms_values.append(None)
+
+    df['v_rms'] = v_rms_values
+    return df
+
+df_transient = calculated_v_rms(dummy_data_copy, 'frequencies', 'modal_masses')
 
 print(df_transient)
 
