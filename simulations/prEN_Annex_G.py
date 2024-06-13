@@ -26,45 +26,56 @@ dummy_data_copy = copy.deepcopy(dummy_data)
 # G.4 Transient response
 # (1) All modes with frequencies up to twice the floor fundamental frequency or 25 Hz (whichever is lower) should be calculated, to obtain the modal mass, stiffness and frequency
 
-def calculated_v_rms(df, column_name_1, column_name_2):
-    if column_name_1 not in df.columns or column_name_2 not in df.columns:
-        raise ValueError(f"Column '{column_name_1}' or '{column_name_2}' does not exist in the DataFrame")
+def calculated_v_rms(df, col_freq, col_mass, col_acting_mass):
+    if col_freq not in df.columns or col_mass not in df.columns or col_acting_mass not in df.columns:
+        raise ValueError(
+            f"One or more required columns are missing: '{col_freq}', '{col_mass}', '{col_acting_mass}'")
 
     v_rms_values = []
 
     for index, row in df.iterrows():
-        list_in_row_1 = row[column_name_1]
-        list_in_row_2 = row[column_name_2]
+        mode_frequencies = row[col_freq]
+        mode_masses = row[col_mass]
+        acting_mass = row[col_acting_mass]
 
-        if isinstance(list_in_row_1, list) and isinstance(list_in_row_2, list) and len(list_in_row_1) == len(list_in_row_2):
+        if isinstance(mode_frequencies, list) and isinstance(mode_masses, list) and len(mode_frequencies) == len(mode_masses):
 
-            if not list_in_row_1:
+            if not mode_frequencies:
                 v_rms_values.append(None)
                 continue
 
-            threshold = min (list_in_row_1[0], 25) # refer to G.4 (1)
+            threshold = min (mode_frequencies[0], 25) # refer to G.4 (1)
 
-            filtered_indices = [i for i, element in enumerate(list_in_row_1) if element >= threshold]
-            filtered_list_1 = [list_in_row_1[i] for i in filtered_indices]
-            filtered_list_2 = [list_in_row_2[i] for i in filtered_indices]
+            filtered_indices = [i for i, element in enumerate(mode_frequencies) if element >= threshold]
+            filtered_frequencies = [mode_frequencies[i] for i in filtered_indices]
+            filtered_masses = [mode_masses[i] for i in filtered_indices]
 
-            if not filtered_list_1:
+            if not filtered_frequencies:
                 v_rms_values.append(None)
                 continue
 
             walking_frequency = 2 # refer to G.3 (4)
             damping_ratio = 2 # assumption
+            period = 1 / walking_frequency
+
+            for i, mode_freq in enumerate(filtered_frequencies):
+                mode_mass = filtered_masses[i] * acting_mass
+
+                I_mod_ef = (54 * walking_frequency**1.43) / mode_freq**1.3
+
+                v_m_peak = I_mod_ef / mode_mass
+
+                time_step_array = np.arange(0, walking_frequency, 0.04)
+                time_steps = time_step_array.tolist()
+
+                v_time_response = 0
+
+                for step in time_steps:
+                    v_m_t = v_m_peak * np.exp(-2 * np.pi * damping_ratio * mode_freq * step * np.sin(2 * np.pi * mode_freq * step))
+
+                    v_time_response += v_m_t
 
 
-            I_mod_ef = [(54 * walking_frequency**1.43) / element**1.3 for element in filtered_list_1]
-
-            v_m_peak = [I_mod_ef[i] / (filtered_list_2[i] * 1000) for i in range(len(filtered_list_1))]
-
-            time_step_array = np.arange(0, walking_frequency, 0.04)
-            time_steps = time_step_array.tolist()
-
-            for i in time_steps:
-                v_m_t = v_m_peak * np.exp(-2 * np.pi * damping_ratio * )
 
             highest = max(v_m_peak)
 
@@ -86,8 +97,7 @@ df_transient = calculated_v_rms(dummy_data_copy, 'frequencies', 'modal_masses')
 
 def calculate_a_rms(df, col_freq, col_mass, col_span, col_acting_mass):
     if col_freq not in df.columns or col_mass not in df.columns or col_span not in df.columns or col_acting_mass not in df.columns:
-        raise ValueError(
-            f"One or more required columns are missing: '{col_freq}', '{col_mass}', '{col_span}', '{col_acting_mass}'")
+        raise ValueError(f"One or more required columns are missing: '{col_freq}', '{col_mass}', '{col_span}', '{col_acting_mass}'")
 
     possible_walking_frequencies = [1.5, 1.6, 1.7, 1.8, 1.9, 2.0]
     harmonics = [1, 2, 3, 4]
