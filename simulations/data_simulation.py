@@ -33,7 +33,7 @@ shear_strength = 0.8 * 4 / 1.25 # k_mod * f_v,090,ylay,k / gamma_m
 # ANALYTICAL FORMULATIONS FOR MODAL PROPERTIES
 
 # set definition floors
-floor_span = 'one-way'
+span_type = 'two-way'
 
 def define_damping(row):
     damping = 0.025 # as defined in prEN for CLT floors
@@ -42,10 +42,10 @@ def define_damping(row):
 
 def calculate_frequency(row):
     k_e_1 = 1.0
-    if floor_span == 'one-way':
+    if span_type == 'one-way':
         k_e_2 = 1.0
 
-    elif floor_span == 'two-way':
+    elif span_type == 'two-way':
         k_e_2 = math.sqrt(1 + ((((row['floor_span']) / (row['floor_width']))**4 * (row['D22'])) / (row['D11'])))
 
     mass = (row['gewicht'] + row['permanent_load'] + 0.1 * row['variable_load'])
@@ -56,10 +56,10 @@ def calculate_frequency(row):
 def calculate_modal_mass(row):
     mass = (row['gewicht'] + row['permanent_load'] + 0.1 * row['variable_load'])
 
-    if floor_span == 'one-way':
+    if span_type == 'one-way':
         modal_mass = (mass * row['floor_span'] * row['floor_width']) / 2
 
-    elif floor_span == 'two-way':
+    elif span_type == 'two-way':
         modal_mass = (mass * row['floor_span'] * row['floor_width']) / 4
 
     else:
@@ -84,6 +84,12 @@ def calculate_bending_unity_check(row):
 
 database_full['unity_check_bending'] = database_full.apply(calculate_bending_unity_check, axis = 1)
 
+def acting_mass(row):
+    mass = row['gewicht'] + row['permanent_load'] + 0.1 * row['variable_load']
+    return mass
+
+database_full['acting_mass'] = database_full.apply(acting_mass, axis = 1)
+
 bending_unity_check_limit = 1
 filtered_database_full = database_full[database_full['unity_check_bending'] < bending_unity_check_limit]
 
@@ -91,6 +97,8 @@ filtered_database_full = database_full[database_full['unity_check_bending'] < be
 #filtered_database_full = database_full[database_full['natural_frequency'] > natural_frequency_min_limit]
 
 filtered_database_full = filtered_database_full[(filtered_database_full['natural_frequency'] >= 4.5) & (filtered_database_full['natural_frequency'] <= 20)]
+
+print(filtered_database_full)
 
 #natural_frequency_max_limit = 20
 #filtered_database_full = database_full[database_full['natural_frequency'] < natural_frequency_max_limit]

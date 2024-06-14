@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 
 from data_simulation import filtered_database_full
 
-filtered_database_full_prEN_ch9 = filtered_database_full.copy()
+filtered_database_full_prEN_ch9 = filtered_database_full
 
 def prEN_acceleration(row):
     k_res = max((0.19 * (row['floor_width'] / row['floor_span']) * (row['D11'] / row['D22'])**0.25), 1.0)
@@ -89,6 +89,7 @@ def check_stiffness_criteria(row, limits):
 filtered_database_full_prEN_ch9['within_limits'] = filtered_database_full_prEN_ch9.apply(lambda row: check_stiffness_criteria(row, prEN_limits), axis=1)
 filtered_database_full_prEN_ch9 = filtered_database_full_prEN_ch9[filtered_database_full_prEN_ch9['within_limits']]
 
+print(filtered_database_full_prEN_ch9)
 
 
 

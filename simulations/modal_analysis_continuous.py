@@ -6,15 +6,11 @@ from itertools import count
 from collections import defaultdict
 from prEN_Chapter_9 import filtered_database_full_prEN_ch9 as data
 
-def calculation_mass(row):
-    mass = row['gewicht'] + row['permanent_load'] + 0.1 * row['variable_load']
-    return mass
-
 def compute_equivalent_E(EI, thickness):
     E = (EI * 12) / (thickness ** 3) * 1000000
     return E
 
-data['acting_mass'] = data.apply(calculation_mass, axis=1)
+
 data['E_longitudinal'] = data.apply(lambda row: compute_equivalent_E(row['D11'], row['dikte']), axis=1)
 data['E_transverse'] = data.apply(lambda row: compute_equivalent_E(row['D22'], row['dikte']), axis=1)
 
