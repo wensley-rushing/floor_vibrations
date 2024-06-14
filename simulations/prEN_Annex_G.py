@@ -26,10 +26,10 @@ dummy_data_copy = copy.deepcopy(dummy_data)
 # G.4 Transient response
 # (1) All modes with frequencies up to twice the floor fundamental frequency or 25 Hz (whichever is lower) should be calculated, to obtain the modal mass, stiffness and frequency
 
-def calculate_v_rms(df, col_freq, col_mass, col_acting_mass, col_span, col_width):
-    if col_freq not in df.columns or col_mass not in df.columns or col_acting_mass not in df.columns or col_span not in df.columns or col_width not in df.columns:
+def calculate_v_rms(df, col_freq, col_mass, col_acting_mass, col_span, col_width, col_damping):
+    if col_freq not in df.columns or col_mass not in df.columns or col_acting_mass not in df.columns or col_span not in df.columns or col_width not in df.columns or col_damping not in df.columns:
         raise ValueError(
-            f"One or more required columns are missing: '{col_freq}', '{col_mass}', '{col_acting_mass}', '{col_span}', '{col_width}'")
+            f"One or more required columns are missing: '{col_freq}', '{col_mass}', '{col_acting_mass}', '{col_span}', '{col_width}', '{col_damping}'")
 
     R_v_rms_values = []
 
@@ -39,6 +39,7 @@ def calculate_v_rms(df, col_freq, col_mass, col_acting_mass, col_span, col_width
         acting_mass = row[col_acting_mass]
         floor_span = row[col_span]
         floor_width = row[col_width]
+        damping_ratio = row[col_damping]
 
         if isinstance(mode_frequencies, list) and isinstance(mode_masses, list) and len(mode_frequencies) == len(mode_masses):
 
@@ -47,7 +48,7 @@ def calculate_v_rms(df, col_freq, col_mass, col_acting_mass, col_span, col_width
                 continue
 
             threshold = min(mode_frequencies[0], 25) # refer to G.4 (1)
-            filtered_indices = [i for i, element in enumerate(mode_frequencies) if element >= threshold]
+            filtered_indices = [i for i, element in enumerate(mode_frequencies) if element <= threshold]
             filtered_frequencies = [mode_frequencies[i] for i in filtered_indices]
             filtered_masses = [mode_masses[i] for i in filtered_indices]
 
@@ -56,7 +57,6 @@ def calculate_v_rms(df, col_freq, col_mass, col_acting_mass, col_span, col_width
                 continue
 
             walking_frequency = 2 # refer to G.3 (4)
-            damping_ratio = 0.02 # assumption
             period = 1 / walking_frequency
 
             time_steps = np.arange(0, period, 0.01)
@@ -109,20 +109,19 @@ def calculate_v_rms(df, col_freq, col_mass, col_acting_mass, col_span, col_width
     df['R_v_rms_mod'] = R_v_rms_values
     return df
 
-df_transient = calculate_v_rms(dummy_data_copy, 'frequencies', 'modal_masses', 'acting_mass', 'floor_span', 'floor_width')
+df_transient = calculate_v_rms(dummy_data_copy, 'frequencies', 'modal_masses', 'acting_mass', 'floor_span', 'floor_width', 'damping')
 
 
 # G.5 Resonant response
 # (1) All modes with frequencies up to 15 Hz should be calculated to obtain modal mass, stiffness and frequency
 # (9) The process outline in this section should be repeated for all possible walking frequencies
 
-def calculate_a_rms(df, col_freq, col_mass, col_span, col_acting_mass, col_width):
-    if col_freq not in df.columns or col_mass not in df.columns or col_span not in df.columns or col_acting_mass not in df.columns or col_width not in df.columns:
-        raise ValueError(f"One or more required columns are missing: '{col_freq}', '{col_mass}', '{col_span}', '{col_acting_mass}', '{col_width}'")
+def calculate_a_rms(df, col_freq, col_mass, col_span, col_acting_mass, col_width, col_damping):
+    if col_freq not in df.columns or col_mass not in df.columns or col_span not in df.columns or col_acting_mass not in df.columns or col_width not in df.columns or col_damping not in df.columns:
+        raise ValueError(f"One or more required columns are missing: '{col_freq}', '{col_mass}', '{col_span}', '{col_acting_mass}', '{col_width}', '{col_damping}'")
 
     possible_walking_frequencies = [1.5, 1.6, 1.7, 1.8, 1.9, 2.0]
     harmonics = [1, 2, 3, 4]
-    damping_ratio = 0.02
     walker_weight = 700  # in Newtons
     threshold = 15  # refer to G.5 (1)
 
@@ -134,6 +133,7 @@ def calculate_a_rms(df, col_freq, col_mass, col_span, col_acting_mass, col_width
         floor_span = row[col_span]
         acting_mass = row[col_acting_mass]
         floor_width = row[col_width]
+        damping_ratio = row[col_damping]
 
         if not isinstance(floor_span, (int, float)):
             raise TypeError(f"Expected numeric type for floor_span, but got {type(floor_span)}")
@@ -144,7 +144,7 @@ def calculate_a_rms(df, col_freq, col_mass, col_span, col_acting_mass, col_width
                 continue
 
             # Filter based on threshold
-            filtered_indices = [i for i, freq in enumerate(mode_frequencies) if freq >= threshold]
+            filtered_indices = [i for i, freq in enumerate(mode_frequencies) if freq <= threshold]
             filtered_frequencies = [mode_frequencies[i] for i in filtered_indices]
             filtered_masses = [mode_masses[i] for i in filtered_indices]
 
@@ -216,7 +216,9 @@ def calculate_a_rms(df, col_freq, col_mass, col_span, col_acting_mass, col_width
 
     return df
 
-df_full = calculate_a_rms(df_transient, 'frequencies', 'modal_masses', 'floor_span', 'acting_mass', 'floor_width')
+df_full = calculate_a_rms(df_transient, 'frequencies', 'modal_masses', 'floor_span', 'acting_mass', 'floor_width', 'damping')
+
+R_a_rms_val = df_full['R_a_rms_mod']
 
 print(df_full['R_a_rms_mod'])
 

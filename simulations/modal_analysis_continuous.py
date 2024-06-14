@@ -7,16 +7,16 @@ from collections import defaultdict
 from prEN_Chapter_9 import filtered_database_full_prEN_ch9 as data
 
 def compute_equivalent_E(EI, thickness):
-    E = (EI * 12) / (thickness ** 3) * 1000000
+    E = (EI * 12) / (thickness ** 3) * 1000000 * 1000000
     return E
 
 
 data['E_longitudinal'] = data.apply(lambda row: compute_equivalent_E(row['D11'], row['dikte']), axis=1)
 data['E_transverse'] = data.apply(lambda row: compute_equivalent_E(row['D22'], row['dikte']), axis=1)
 
-dummy_data = data.iloc[25:26].copy()
+dummy_data = data.iloc[31:32].copy()
 
-def model_two_way(floor_span, floor_width, thickness, mass_per_area, mesh_size=0.9, shell=True, output=False):
+def model_two_way(floor_span, floor_width, thickness, mass_per_area, E_long, E_trans, mesh_size=0.9, shell=True, output=False):
     try:
         thickness = (thickness / 1000) # m
         div = (floor_width / 2.7) - 1
@@ -67,7 +67,7 @@ def model_two_way(floor_span, floor_width, thickness, mass_per_area, mesh_size=0
             matTag = 1
 
             # Placeholder material properties
-            Ex, Ey, Ez = 10000E6, 780E6, 430E6
+            Ex, Ey, Ez = E_long, E_trans, 430E6
             nu_xy, nu_yz, nu_zx = 0.372, 0.435, 0.02
             Gxy, Gyz, Gzx = 640E6, 30E6, 610E6
             rho = mass_per_area
@@ -146,10 +146,10 @@ def model_two_way(floor_span, floor_width, thickness, mass_per_area, mesh_size=0
         mass_dist = np.array([masses[a] for a in node_nums])
         modal_masses_percentage = dict()
 
-        # if output:
-        #     print('\tMode\tFreq\tMass Percentage')
+        if output:
+            print('\tMode\tFreq\tMass Percentage')
 
-        # fig, axes = plt.subplots(1, numEigen, figsize=(20, 4))
+        fig, axes = plt.subplots(1, numEigen, figsize=(20, 4))
         if numEigen == 1:
             axes = [axes]
 
@@ -160,18 +160,18 @@ def model_two_way(floor_span, floor_width, thickness, mass_per_area, mesh_size=0
 
             modal_masses_percentage[i] = np.sum(ev_data ** 2 * mass_dist) / np.sum(mass_dist)
 
-            # if output:
-            #     print(f'\t{i:5}\t{freqs[i]:5.2f}\t{modal_masses_percentage[i] * 100:5.1f}%')
+            if output:
+                print(f'\t{i:5}\t{freqs[i]:5.2f}\t{modal_masses_percentage[i] * 100:5.1f}%')
 
             # Plot mode shape
-            # c = axes[i].contourf(xx, yy, zz)
-            # axes[i].set_title(f'Mode {i + 1}')
-            # axes[i].set_xlabel('X Position')
-            # axes[i].set_ylabel('Y Position')
-            # fig.colorbar(c, ax=axes[i], orientation='vertical', label='Displacement')
+            c = axes[i].contourf(xx, yy, zz)
+            axes[i].set_title(f'Mode {i + 1}')
+            axes[i].set_xlabel('X Position')
+            axes[i].set_ylabel('Y Position')
+            fig.colorbar(c, ax=axes[i], orientation='vertical', label='Displacement')
 
-        # plt.tight_layout()
-        # plt.show()
+        plt.tight_layout()
+        plt.show()
 
         return freqs, modal_masses_percentage
 
@@ -202,9 +202,11 @@ for index, row in dummy_data.iterrows():
     floor_width = row['floor_width']
     thickness = row['dikte']
     mass_per_area = row['acting_mass']
+    E_long = row['E_longitudinal']
+    E_trans = row['E_transverse']
 
 
-    frequencies, modal_masses = model_two_way(floor_span, floor_width, thickness, mass_per_area, output=True)
+    frequencies, modal_masses = model_two_way(floor_span, floor_width, thickness, mass_per_area, E_long, E_trans, output=True)
     if frequencies is not None and modal_masses is not None:
         freq_lists.append(frequencies.tolist())
         mass_lists.append(list(modal_masses.values()))
