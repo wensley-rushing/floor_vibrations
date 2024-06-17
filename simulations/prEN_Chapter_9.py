@@ -89,7 +89,7 @@ def check_stiffness_criteria(row, limits):
 filtered_database_full_prEN_ch9['within_limits'] = filtered_database_full_prEN_ch9.apply(lambda row: check_stiffness_criteria(row, prEN_limits), axis=1)
 filtered_database_full_prEN_ch9 = filtered_database_full_prEN_ch9[filtered_database_full_prEN_ch9['within_limits']]
 
-print(filtered_database_full_prEN_ch9)
+# print(filtered_database_full_prEN_ch9)
 
 
 

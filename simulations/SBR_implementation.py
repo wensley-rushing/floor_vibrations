@@ -1,10 +1,9 @@
-import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
 from scipy.interpolate import RegularGridInterpolator
-from itertools import product
 
-from data_simulation import filtered_database_full
+
+from prEN_Annex_G import df_full
 
 
 # extract CLT list from excel
@@ -32,7 +31,7 @@ def interpolate_value(row):
     y_val_clipped = np.clip(y_val, y_min, y_max)
     return interpolator((y_val_clipped, x_val_clipped))
 
-filtered_database_full_copy = filtered_database_full.copy()
+filtered_database_full_copy = df_full.copy()
 
 filtered_database_full_copy.loc[:, 'ES_RMS_value'] = filtered_database_full_copy.apply(interpolate_value, axis=1)
 
@@ -45,7 +44,7 @@ response_classes = ['A', 'B', 'C', 'D', 'E', 'F']
 
 SBR_limits = pd.DataFrame(ES_RMS_limits, index = response_classes)
 
-print(SBR_limits)
+# print(SBR_limits)
 
 response_class_list = []
 
@@ -64,20 +63,22 @@ for index, row in filtered_database_full_copy.iterrows():
 
 filtered_database_full_copy['response_class'] = response_class_list
 
-print(filtered_database_full_copy)
+# print(filtered_database_full_copy)
 
-
-colors = {'A': 'red', 'B': 'blue', 'C': 'green', 'D': 'orange', 'E': 'purple', 'F': 'black'}
-
-plt.figure(figsize=(6,10))
-
-for cls, color in colors.items():
-    subset = filtered_database_full_copy[filtered_database_full_copy['response_class'] == cls]
-    plt.scatter(subset['modal_mass'], subset['natural_frequency'], color = color, label = cls)
-
-plt.xlabel('Modal Mass')
-plt.ylabel('Natural Frequency')
-plt.title('Scatter Plot of Modal Mass vs Natural Frequency')
-plt.legend(title='Response Class')
-plt.show()
+filtered_database_full_copy.to_excel('data_two_way.xlsx', index = False)
+#
+#
+# colors = {'A': 'red', 'B': 'blue', 'C': 'green', 'D': 'orange', 'E': 'purple', 'F': 'black'}
+#
+# plt.figure(figsize=(6,10))
+#
+# for cls, color in colors.items():
+#     subset = filtered_database_full_copy[filtered_database_full_copy['response_class'] == cls]
+#     plt.scatter(subset['modal_mass'], subset['natural_frequency'], color = color, label = cls)
+#
+# plt.xlabel('Modal Mass')
+# plt.ylabel('Natural Frequency')
+# plt.title('Scatter Plot of Modal Mass vs Natural Frequency')
+# plt.legend(title='Response Class')
+# plt.show()
 

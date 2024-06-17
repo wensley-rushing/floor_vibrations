@@ -66,30 +66,30 @@ def calculate_v_rms(df, col_freq, col_mass, col_acting_mass, col_span, col_width
             for step in time_steps:
                 v_time_step = 0
 
-                print(f'step:{step}')
+                # print(f'step:{step}')
 
                 for i, mode_freq in enumerate(filtered_frequencies):
                     mode_mass = filtered_masses[i] * acting_mass * floor_span * floor_width
 
-                    print(f'freq:{mode_freq}')
-                    print(f'mass:{mode_mass}')
+                    # print(f'freq:{mode_freq}')
+                    # print(f'mass:{mode_mass}')
 
                     I_mod_ef = (54 * walking_frequency ** 1.43) / mode_freq ** 1.3
 
                     v_m_peak = I_mod_ef / mode_mass
 
-                    print(f'v_m_peak:{v_m_peak}')
+                    # print(f'v_m_peak:{v_m_peak}')
 
                     v_m_t = v_m_peak * np.exp(-2 * np.pi * damping_ratio * mode_freq * step) * np.sin(2 * np.pi * mode_freq * step)
-                    print(f'v_m_t:{v_m_t}')
+                    # print(f'v_m_t:{v_m_t}')
 
                     v_time_step += v_m_t
 
-                    print(f'v_time_step:{v_time_step}')
+                    # print(f'v_time_step:{v_time_step}')
 
                 v_tot += v_time_step ** 2
 
-                print(f'v_tot:{v_tot}')
+                # print(f'v_tot:{v_tot}')
 
             v_rms = np.sqrt(v_tot / len(time_steps))
 
@@ -220,7 +220,7 @@ df_full = calculate_a_rms(df_transient, 'frequencies', 'modal_masses', 'floor_sp
 
 R_a_rms_val = df_full['R_a_rms_mod']
 
-print(df_full['R_a_rms_mod'])
+# print(df_full['R_a_rms_mod'])
 
 
 

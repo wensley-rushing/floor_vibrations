@@ -146,12 +146,12 @@ def model_two_way(floor_span, floor_width, thickness, mass_per_area, E_long, E_t
         mass_dist = np.array([masses[a] for a in node_nums])
         modal_masses_percentage = dict()
 
-        if output:
-            print('\tMode\tFreq\tMass Percentage')
-
-        fig, axes = plt.subplots(1, numEigen, figsize=(20, 4))
-        if numEigen == 1:
-            axes = [axes]
+        # if output:
+        #     print('\tMode\tFreq\tMass Percentage')
+        #
+        # fig, axes = plt.subplots(1, numEigen, figsize=(20, 4))
+        # if numEigen == 1:
+        #     axes = [axes]
 
         for i in range(numEigen):
             ev_data = np.array([ops.nodeEigenvector(a, i + 1, 3) for a in node_nums])
@@ -163,15 +163,15 @@ def model_two_way(floor_span, floor_width, thickness, mass_per_area, E_long, E_t
             if output:
                 print(f'\t{i:5}\t{freqs[i]:5.2f}\t{modal_masses_percentage[i] * 100:5.1f}%')
 
-            # Plot mode shape
-            c = axes[i].contourf(xx, yy, zz)
-            axes[i].set_title(f'Mode {i + 1}')
-            axes[i].set_xlabel('X Position')
-            axes[i].set_ylabel('Y Position')
-            fig.colorbar(c, ax=axes[i], orientation='vertical', label='Displacement')
-
-        plt.tight_layout()
-        plt.show()
+        #     # Plot mode shape
+        #     c = axes[i].contourf(xx, yy, zz)
+        #     axes[i].set_title(f'Mode {i + 1}')
+        #     axes[i].set_xlabel('X Position')
+        #     axes[i].set_ylabel('Y Position')
+        #     fig.colorbar(c, ax=axes[i], orientation='vertical', label='Displacement')
+        #
+        # plt.tight_layout()
+        # plt.show()
 
         return freqs, modal_masses_percentage
 
@@ -218,5 +218,5 @@ for index, row in dummy_data.iterrows():
 dummy_data.loc[:, 'frequencies'] = freq_lists
 dummy_data.loc[:, 'modal_masses'] = mass_lists
 
-print(dummy_data)
+# print(dummy_data)
 

@@ -98,7 +98,7 @@ filtered_database_full = database_full[database_full['unity_check_bending'] < be
 
 filtered_database_full = filtered_database_full[(filtered_database_full['natural_frequency'] >= 4.5) & (filtered_database_full['natural_frequency'] <= 20)]
 
-print(filtered_database_full)
+# print(filtered_database_full)
 
 #natural_frequency_max_limit = 20
 #filtered_database_full = database_full[database_full['natural_frequency'] < natural_frequency_max_limit]
