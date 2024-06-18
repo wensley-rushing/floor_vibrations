@@ -32,8 +32,10 @@ shear_strength = 0.8 * 4 / 1.25 # k_mod * f_v,090,ylay,k / gamma_m
 
 # ANALYTICAL FORMULATIONS FOR MODAL PROPERTIES
 
-# set definition floors
-span_type = 'two-way'
+def define_span_type(row):
+    span_type = 'one-way' # as defined in prEN for CLT floors
+
+    return span_type
 
 def define_damping(row):
     damping = 0.025 # as defined in prEN for CLT floors
@@ -41,6 +43,9 @@ def define_damping(row):
     return damping
 
 def calculate_frequency(row):
+
+    span_type = row['span_type']
+
     k_e_1 = 1.0
     if span_type == 'one-way':
         k_e_2 = 1.0
@@ -56,6 +61,8 @@ def calculate_frequency(row):
 def calculate_modal_mass(row):
     mass = (row['gewicht'] + row['permanent_load'] + 0.1 * row['variable_load'])
 
+    span_type = row['span_type']
+
     if span_type == 'one-way':
         modal_mass = (mass * row['floor_span'] * row['floor_width']) / 2
 
@@ -69,9 +76,10 @@ def calculate_modal_mass(row):
 
 # CLEANING DATABASE
 
+database_full['span_type'] = database_full.apply(define_span_type, axis = 1)
 database_full['damping'] = database_full.apply(define_damping, axis = 1)
-database_full['natural_frequency'] = database_full.apply(calculate_frequency, axis = 1)
-database_full['modal_mass'] = database_full.apply(calculate_modal_mass, axis = 1)
+database_full['nat_freq_prEN_Ch9'] = database_full.apply(calculate_frequency, axis = 1)
+database_full['modal_mass_prEN_Ch9'] = database_full.apply(calculate_modal_mass, axis = 1)
 
 def calculate_bending_unity_check(row):
     load = (1.35 * (row['gewicht'] + row['permanent_load']) + 1.5 * row['variable_load']) * 0.0098 # [kN/m]
@@ -91,12 +99,14 @@ def acting_mass(row):
 database_full['acting_mass'] = database_full.apply(acting_mass, axis = 1)
 
 bending_unity_check_limit = 1
-filtered_database_full = database_full[database_full['unity_check_bending'] < bending_unity_check_limit]
+filtered_database_ULS = database_full[database_full['unity_check_bending'] < bending_unity_check_limit]
 
-#natural_frequency_min_limit = 4.5
-#filtered_database_full = database_full[database_full['natural_frequency'] > natural_frequency_min_limit]
+# natural_frequency_min_limit = 4.5
+# filtered_database_full = database_full[database_full['nat_freq_prEN_Ch9'] > natural_frequency_min_limit]
 
-filtered_database_full = filtered_database_full[(filtered_database_full['natural_frequency'] >= 4.5) & (filtered_database_full['natural_frequency'] <= 20)]
+filtered_database_ULS = filtered_database_ULS[(filtered_database_ULS['nat_freq_prEN_Ch9'] >= 4.5) & (filtered_database_ULS['nat_freq_prEN_Ch9'] <= 20)]
+
+print(filtered_database_ULS)
 
 # print(filtered_database_full)
 

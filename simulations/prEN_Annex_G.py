@@ -218,9 +218,7 @@ def calculate_a_rms(df, col_freq, col_mass, col_span, col_acting_mass, col_width
 
 df_full = calculate_a_rms(df_transient, 'frequencies', 'modal_masses', 'floor_span', 'acting_mass', 'floor_width', 'damping')
 
-R_a_rms_val = df_full['R_a_rms_mod']
-
-# print(df_full['R_a_rms_mod'])
+print(df_full)
 
 
 

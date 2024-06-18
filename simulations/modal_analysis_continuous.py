@@ -14,7 +14,7 @@ def compute_equivalent_E(EI, thickness):
 data['E_longitudinal'] = data.apply(lambda row: compute_equivalent_E(row['D11'], row['dikte']), axis=1)
 data['E_transverse'] = data.apply(lambda row: compute_equivalent_E(row['D22'], row['dikte']), axis=1)
 
-dummy_data = data.iloc[31:32].copy()
+dummy_data = data.iloc[600:601].copy()
 
 def model_two_way(floor_span, floor_width, thickness, mass_per_area, E_long, E_trans, mesh_size=0.9, shell=True, output=False):
     try:
@@ -137,21 +137,21 @@ def model_two_way(floor_span, floor_width, thickness, mass_per_area, E_long, E_t
 
         freqs = eigenValues**0.5 / (2 * np.pi)
 
-        #if output:
-        #    print(f"Computed Eigenvalues: {eigenValues}")
-        #    print(f"Computed Frequencies: {freqs}")
+        if output:
+           print(f"Computed Eigenvalues: {eigenValues}")
+           print(f"Computed Frequencies: {freqs}")
 
         ops.record()
 
         mass_dist = np.array([masses[a] for a in node_nums])
         modal_masses_percentage = dict()
 
-        # if output:
-        #     print('\tMode\tFreq\tMass Percentage')
-        #
-        # fig, axes = plt.subplots(1, numEigen, figsize=(20, 4))
-        # if numEigen == 1:
-        #     axes = [axes]
+        if output:
+            print('\tMode\tFreq\tMass Percentage')
+
+        fig, axes = plt.subplots(1, numEigen, figsize=(20, 4))
+        if numEigen == 1:
+            axes = [axes]
 
         for i in range(numEigen):
             ev_data = np.array([ops.nodeEigenvector(a, i + 1, 3) for a in node_nums])
@@ -163,15 +163,15 @@ def model_two_way(floor_span, floor_width, thickness, mass_per_area, E_long, E_t
             if output:
                 print(f'\t{i:5}\t{freqs[i]:5.2f}\t{modal_masses_percentage[i] * 100:5.1f}%')
 
-        #     # Plot mode shape
-        #     c = axes[i].contourf(xx, yy, zz)
-        #     axes[i].set_title(f'Mode {i + 1}')
-        #     axes[i].set_xlabel('X Position')
-        #     axes[i].set_ylabel('Y Position')
-        #     fig.colorbar(c, ax=axes[i], orientation='vertical', label='Displacement')
-        #
-        # plt.tight_layout()
-        # plt.show()
+            # Plot mode shape
+            c = axes[i].contourf(xx, yy, zz)
+            axes[i].set_title(f'Mode {i + 1}')
+            axes[i].set_xlabel('X Position')
+            axes[i].set_ylabel('Y Position')
+            fig.colorbar(c, ax=axes[i], orientation='vertical', label='Displacement')
+
+        plt.tight_layout()
+        plt.show()
 
         return freqs, modal_masses_percentage
 

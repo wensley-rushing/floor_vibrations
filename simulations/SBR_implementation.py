@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 from scipy.interpolate import RegularGridInterpolator
+import matplotlib as plt
 
 
 from prEN_Annex_G import df_full
@@ -22,6 +23,16 @@ interpolator = RegularGridInterpolator((y, x), ES_RMS_table.values, method='line
 x_min, x_max = x.min(), x.max()
 y_min, y_max = y.min(), y.max()
 
+def nat_freq_SBR(row):
+    span_type = row['span_type']
+
+    if span_type == 'one-way':
+        k_e_2 = 1.0
+
+    elif span_type == 'two-way':
+        nat_freq_SBR = (np.pi / (2 * row['floor_span']**2)) * np.sqrt(row['D11'] * 1000 / row['acting_mass']) * np.sqrt(1 + (2 * (row['floor_span'] / row['floor_width'])**2 + (row['floor_span'] / row['floor_width'])**4) * (row['D22'] / row['D11']))
+
+    return nat_freq_SBR
 # Define a function to perform the interpolation
 def interpolate_value(row):
     x_val = row['modal_mass']
@@ -65,7 +76,7 @@ filtered_database_full_copy['response_class'] = response_class_list
 
 # print(filtered_database_full_copy)
 
-filtered_database_full_copy.to_excel('data_two_way.xlsx', index = False)
+# filtered_database_full_copy.to_excel('data_two_way.xlsx', index = False)
 #
 #
 # colors = {'A': 'red', 'B': 'blue', 'C': 'green', 'D': 'orange', 'E': 'purple', 'F': 'black'}
