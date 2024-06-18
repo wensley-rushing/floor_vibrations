@@ -106,7 +106,7 @@ filtered_database_ULS = database_full[database_full['unity_check_bending'] < ben
 
 filtered_database_ULS = filtered_database_ULS[(filtered_database_ULS['nat_freq_prEN_Ch9'] >= 4.5) & (filtered_database_ULS['nat_freq_prEN_Ch9'] <= 20)]
 
-print(filtered_database_ULS)
+# print(filtered_database_ULS)
 
 # print(filtered_database_full)
 

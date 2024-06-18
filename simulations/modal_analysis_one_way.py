@@ -14,11 +14,11 @@ def compute_equivalent_E(EI, thickness):
 data['E_longitudinal'] = data.apply(lambda row: compute_equivalent_E(row['D11'], row['dikte']), axis=1)
 data['E_transverse'] = data.apply(lambda row: compute_equivalent_E(row['D22'], row['dikte']), axis=1)
 
-# dummy_data = data.iloc[600:601].copy()
+# dummy_data = data.iloc[25:26].copy()
 
 dummy_data = data.copy()
 
-def model_two_way(floor_span, floor_width, thickness, mass_per_area, E_long, E_trans, mesh_size=0.9, shell=True, output=False):
+def model_two_way(floor_span, floor_width, thickness, mass_per_area, E_long, E_trans, support_type, mesh_size=0.9, shell=True, output=False):
     try:
         thickness = (thickness / 1000) # m
         div = (floor_width / 2.7) - 1
@@ -36,30 +36,31 @@ def model_two_way(floor_span, floor_width, thickness, mass_per_area, E_long, E_t
 
         nums = (np.arange(0, len(xx.flatten())) + 1).reshape(xx.shape)
         node_nums = [int(a) for a in nums.flatten()]
-        all_nodes = nums.flatten()
-
-        mid = int(all_nodes[int(len(all_nodes) / 2)])
 
         # if output:
         #     print('Mid plate point:')
         #     print(xx.flatten()[mid-1], yy.flatten()[mid-1])
 
-        l_b = nums[:-1, :-1]
-        r_b = nums[:-1, 1:]
-        r_t = nums[1:, 1:]
-        l_t = nums[1:, :-1]
-
-        locs = [l_b, r_b, r_t, l_t]
-        element_nodes = np.array([a.flatten() for a in locs]).T
-
-        fixed = np.unique([b for a in [nums[0, :], nums[-1, :], nums[:, 0], nums[:, -1]] for b in a])
+        # Determine fixed nodes on the left and right sides
+        if support_type == 'one-way':
+            fixed_left = np.unique(nums[:, 0])
+            fixed_right = np.unique(nums[:, -1])
+            fixed_nodes = np.unique(np.concatenate((fixed_left, fixed_right)))
+        elif support_type == 'two-way':
+            fixed_left = np.unique(nums[:, 0])
+            fixed_right = np.unique(nums[:, -1])
+            fixed_bottom = np.unique(nums[0, :])
+            fixed_top = np.unique(nums[-1, :])
+            fixed_nodes = np.unique(np.concatenate((fixed_left, fixed_right, fixed_bottom, fixed_top)))
+        else:
+            raise ValueError("Unsupported support type. Use 'one-way' or 'two-way'.")
 
         nodes = {}
         for i, (x, y) in enumerate(zip(xx.flatten(), yy.flatten()), 1):
-            nodes[i] = (x, y)
+            nodes[i] = (x, y, 0)
             ops.node(i, x, y, 0)
-            if i in fixed:
-                ops.fix(i, 1, 1, 1, 0, 0, 0)
+            if i in fixed_nodes:
+                ops.fix(i, 1, 1, 1, 0, 0, 0)  # Fix only UX, UY, and ROTZ
 
         masses = defaultdict(float)
 
@@ -76,6 +77,13 @@ def model_two_way(floor_span, floor_width, thickness, mass_per_area, E_long, E_t
 
             ops.nDMaterial('ElasticOrthotropic', matTag, Ex, Ey, Ez, nu_xy, nu_yz, nu_zx, Gxy, Gyz, Gzx, rho)
             ops.section('PlateFiber', mat_num, matTag, thickness)
+
+            l_b = nums[:-1, :-1]
+            r_b = nums[:-1, 1:]
+            r_t = nums[1:, 1:]
+            l_t = nums[1:, :-1]
+            locs = [l_b, r_b, r_t, l_t]
+            element_nodes = np.array([a.flatten() for a in locs]).T
 
             for e, _nodes in enumerate(element_nodes, 1):
                 e_nodes = _nodes
@@ -152,8 +160,8 @@ def model_two_way(floor_span, floor_width, thickness, mass_per_area, E_long, E_t
             print('\tMode\tFreq\tMass Percentage')
 
         # fig, axes = plt.subplots(1, numEigen, figsize=(20, 4))
-        if numEigen == 1:
-            axes = [axes]
+        # if numEigen == 1:
+        #     axes = [axes]
 
         for i in range(numEigen):
             ev_data = np.array([ops.nodeEigenvector(a, i + 1, 3) for a in node_nums])
@@ -165,7 +173,7 @@ def model_two_way(floor_span, floor_width, thickness, mass_per_area, E_long, E_t
             if output:
                 print(f'\t{i:5}\t{freqs[i]:5.2f}\t{modal_masses_percentage[i] * 100:5.1f}%')
 
-        #     # Plot mode shape
+            # Plot mode shape
         #     c = axes[i].contourf(xx, yy, zz)
         #     axes[i].set_title(f'Mode {i + 1}')
         #     axes[i].set_xlabel('X Position')
@@ -206,9 +214,10 @@ for index, row in dummy_data.iterrows():
     mass_per_area = row['acting_mass']
     E_long = row['E_longitudinal']
     E_trans = row['E_transverse']
+    support_type = row['span_type']
 
 
-    frequencies, modal_masses = model_two_way(floor_span, floor_width, thickness, mass_per_area, E_long, E_trans, output=True)
+    frequencies, modal_masses = model_two_way(floor_span, floor_width, thickness, mass_per_area, E_long, E_trans, support_type, output=True)
     if frequencies is not None and modal_masses is not None:
         freq_lists.append(frequencies.tolist())
         mass_lists.append(list(modal_masses.values()))
@@ -221,4 +230,3 @@ dummy_data.loc[:, 'frequencies'] = freq_lists
 dummy_data.loc[:, 'modal_masses'] = mass_lists
 
 # print(dummy_data)
-

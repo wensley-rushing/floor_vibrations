@@ -6,6 +6,8 @@ import matplotlib as plt
 
 from prEN_Annex_G import df_full
 
+filtered_database_full_copy = df_full.copy()
+
 
 # extract CLT list from excel
 
@@ -23,26 +25,26 @@ interpolator = RegularGridInterpolator((y, x), ES_RMS_table.values, method='line
 x_min, x_max = x.min(), x.max()
 y_min, y_max = y.min(), y.max()
 
-def nat_freq_SBR(row):
+def calculate_nat_freq_SBR(row):
     span_type = row['span_type']
 
     if span_type == 'one-way':
-        k_e_2 = 1.0
+        nat_freq_SBR = (np.pi / (2 * row['floor_span'] ** 2)) * np.sqrt(row['D11'] * 1000 / row['acting_mass'])
 
     elif span_type == 'two-way':
         nat_freq_SBR = (np.pi / (2 * row['floor_span']**2)) * np.sqrt(row['D11'] * 1000 / row['acting_mass']) * np.sqrt(1 + (2 * (row['floor_span'] / row['floor_width'])**2 + (row['floor_span'] / row['floor_width'])**4) * (row['D22'] / row['D11']))
 
     return nat_freq_SBR
+
+filtered_database_full_copy.loc[:, 'nat_freq_SBR'] = filtered_database_full_copy.apply(calculate_nat_freq_SBR, axis=1)
 # Define a function to perform the interpolation
 def interpolate_value(row):
-    x_val = row['modal_mass']
-    y_val = row['natural_frequency']
+    x_val = row['modal_mass_prEN_Ch9']
+    y_val = row['nat_freq_SBR']
     # Clip values to be within the grid bounds
     x_val_clipped = np.clip(x_val, x_min, x_max)
     y_val_clipped = np.clip(y_val, y_min, y_max)
     return interpolator((y_val_clipped, x_val_clipped))
-
-filtered_database_full_copy = df_full.copy()
 
 filtered_database_full_copy.loc[:, 'ES_RMS_value'] = filtered_database_full_copy.apply(interpolate_value, axis=1)
 
@@ -76,7 +78,9 @@ filtered_database_full_copy['response_class'] = response_class_list
 
 # print(filtered_database_full_copy)
 
-# filtered_database_full_copy.to_excel('data_two_way.xlsx', index = False)
+# print(filtered_database_full_copy)
+
+filtered_database_full_copy.to_excel('data_one_way_i1.xlsx', index = False)
 #
 #
 # colors = {'A': 'red', 'B': 'blue', 'C': 'green', 'D': 'orange', 'E': 'purple', 'F': 'black'}

@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 import copy
-from modal_analysis_continuous import dummy_data
+from modal_analysis_one_way import dummy_data
 
 dummy_data_copy = copy.deepcopy(dummy_data)
 
@@ -218,7 +218,7 @@ def calculate_a_rms(df, col_freq, col_mass, col_span, col_acting_mass, col_width
 
 df_full = calculate_a_rms(df_transient, 'frequencies', 'modal_masses', 'floor_span', 'acting_mass', 'floor_width', 'damping')
 
-print(df_full)
+# print(df_full)
 
 
 
