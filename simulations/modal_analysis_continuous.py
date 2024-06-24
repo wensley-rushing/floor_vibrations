@@ -14,9 +14,9 @@ def compute_equivalent_E(EI, thickness):
 data['E_longitudinal'] = data.apply(lambda row: compute_equivalent_E(row['D11'], row['dikte']), axis=1)
 data['E_transverse'] = data.apply(lambda row: compute_equivalent_E(row['D22'], row['dikte']), axis=1)
 
-# dummy_data = data.iloc[600:601].copy()
+dummy_data = data.iloc[600:601].copy()
 
-dummy_data = data.copy()
+# dummy_data = data.copy()
 
 def model_two_way(floor_span, floor_width, thickness, mass_per_area, E_long, E_trans, mesh_size=0.9, shell=True, output=False):
     try:
@@ -218,7 +218,11 @@ for index, row in dummy_data.iterrows():
 
 # Append the lists to the DataFrame
 dummy_data.loc[:, 'frequencies'] = freq_lists
-dummy_data.loc[:, 'modal_masses'] = mass_lists
+dummy_data.loc[:, 'modal_masses_per'] = mass_lists
 
-# print(dummy_data)
+dummy_data['modal_masses'] = dummy_data.apply(
+    lambda row: [mass_perc * row['floor_width'] * row['floor_span'] * row['acting_mass'] for mass_perc in row['modal_masses_per']], axis=1
+)
+
+print(dummy_data)
 

@@ -78,9 +78,9 @@ filtered_database_full_copy['response_class'] = response_class_list
 
 # print(filtered_database_full_copy)
 
-# print(filtered_database_full_copy)
+filtered_database_full_copy.to_excel('data_two_way_i4.xlsx', index = False)
 
-filtered_database_full_copy.to_excel('data_one_way_i1.xlsx', index = False)
+#--------------------------------------------------------------------------------------------------------------
 #
 #
 # colors = {'A': 'red', 'B': 'blue', 'C': 'green', 'D': 'orange', 'E': 'purple', 'F': 'black'}

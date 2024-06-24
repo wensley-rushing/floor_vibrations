@@ -69,7 +69,8 @@ def calculate_v_rms(df, col_freq, col_mass, col_acting_mass, col_span, col_width
                 # print(f'step:{step}')
 
                 for i, mode_freq in enumerate(filtered_frequencies):
-                    mode_mass = filtered_masses[i] * acting_mass * floor_span * floor_width
+                    #Updating here
+                    mode_mass = filtered_masses[i]
 
                     # print(f'freq:{mode_freq}')
                     # print(f'mass:{mode_mass}')
@@ -109,7 +110,7 @@ def calculate_v_rms(df, col_freq, col_mass, col_acting_mass, col_span, col_width
     df['R_v_rms_mod'] = R_v_rms_values
     return df
 
-df_transient = calculate_v_rms(dummy_data_copy, 'frequencies', 'modal_masses', 'acting_mass', 'floor_span', 'floor_width', 'damping')
+df_transient = calculate_v_rms(dummy_data, 'frequencies', 'modal_masses', 'acting_mass', 'floor_span', 'floor_width', 'damping')
 
 
 # G.5 Resonant response
@@ -181,7 +182,8 @@ def calculate_a_rms(df, col_freq, col_mass, col_span, col_acting_mass, col_width
                         A_m = 1 - (f_h / mode_freq) ** 2
                         B_m = 2 * damping_ratio * f_h / mode_freq
                         miu_res = 1 - np.exp(-2 * np.pi * damping_ratio * 0.55 * harmonic * floor_span / 0.7)
-                        mode_mass = filtered_masses[i] * acting_mass * floor_width * floor_span
+                        #Updating here
+                        mode_mass = filtered_masses[i]
 
                         a_real_h_m = (f_h / mode_freq) ** 2 * (F_har * miu_res / mode_mass) * (A_m / (A_m ** 2 + B_m ** 2))
                         a_imag_h_m = (f_h / mode_freq) ** 2 * (F_har * miu_res / mode_mass) * (B_m / (A_m ** 2 + B_m ** 2))
@@ -218,7 +220,27 @@ def calculate_a_rms(df, col_freq, col_mass, col_span, col_acting_mass, col_width
 
 df_full = calculate_a_rms(df_transient, 'frequencies', 'modal_masses', 'floor_span', 'acting_mass', 'floor_width', 'damping')
 
-# print(df_full)
+def compute_R_arms_gov(row):
+    R_v = row['R_v_rms_mod']
+    R_a = row['R_a_rms_mod']
+    frequencies = row['frequencies']
+
+    if frequencies and frequencies[0] > 10: #Largest walking frequency
+        return R_v
+
+    if R_a is None or not R_a or R_a == [None]:
+        return R_v
+
+    if all(R_v > ra for ra in R_a if ra is not None):
+        return R_v
+
+    else:
+        return R_a
+
+
+df_full['R_rms_gov'] = df_full.apply(compute_R_arms_gov, axis = 1)
+
+print(df_full)
 
 
 

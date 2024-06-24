@@ -18,7 +18,7 @@ parameters = {
     'floor_width': {'min': 2.7, 'max': 10.8, 'step': 2.7},
     'floor_span': {'min': 3, 'max': 8, 'step': 0.5},
     'permanent_load': {'min': 0, 'max': 300, 'step': 100},
-    'variable_load': {'min': 0, 'max': 200, 'step': 100}
+    'variable_load': {'min': 0, 'max': 500, 'step': 100}
 }
 
 all_combinations = list(product(*[np.linspace(param['min'], param['max'], int((param['max'] - param['min']) / param['step']) + 1) for param in parameters.values()]))
@@ -33,7 +33,7 @@ shear_strength = 0.8 * 4 / 1.25 # k_mod * f_v,090,ylay,k / gamma_m
 # ANALYTICAL FORMULATIONS FOR MODAL PROPERTIES
 
 def define_span_type(row):
-    span_type = 'one-way' # as defined in prEN for CLT floors
+    span_type = 'two-way' # as defined in prEN for CLT floors
 
     return span_type
 
