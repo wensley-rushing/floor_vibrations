@@ -78,22 +78,25 @@ filtered_database_full_copy['response_class'] = response_class_list
 
 # print(filtered_database_full_copy)
 
-filtered_database_full_copy.to_excel('data_two_way_i4.xlsx', index = False)
+# filtered_database_full_copy.to_excel('data_two_way_i4.xlsx', index = False)
 
 #--------------------------------------------------------------------------------------------------------------
 #
 #
-# colors = {'A': 'red', 'B': 'blue', 'C': 'green', 'D': 'orange', 'E': 'purple', 'F': 'black'}
-#
-# plt.figure(figsize=(6,10))
-#
-# for cls, color in colors.items():
-#     subset = filtered_database_full_copy[filtered_database_full_copy['response_class'] == cls]
-#     plt.scatter(subset['modal_mass'], subset['natural_frequency'], color = color, label = cls)
-#
-# plt.xlabel('Modal Mass')
-# plt.ylabel('Natural Frequency')
-# plt.title('Scatter Plot of Modal Mass vs Natural Frequency')
-# plt.legend(title='Response Class')
-# plt.show()
+colors = {'A': 'red', 'B': 'blue', 'C': 'green', 'D': 'orange', 'E': 'purple', 'F': 'black'}
+
+plt.figure(figsize=(6,10))
+
+for cls, color in colors.items():
+    subset = filtered_database_full_copy[filtered_database_full_copy['response_class'] == cls]
+    plt.scatter(subset['modal_mass'], subset['natural_frequency'], color = color, label = cls)
+
+plt.xscale('log')
+plt.yscale('log')
+
+plt.xlabel('Modal Mass')
+plt.ylabel('Natural Frequency')
+plt.title('Scatter Plot of Modal Mass vs Natural Frequency')
+plt.legend(title='Response Class')
+plt.show()
 

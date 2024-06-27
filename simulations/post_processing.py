@@ -213,6 +213,82 @@ else:
 
 
 
+
+# FULL PLOTS
+
+## ONE-WAY
+colors_SBR = {'A': 'purple', 'B': 'blue', 'C': 'green', 'D': 'yellow', 'E': 'orange', 'F': 'red'}
+
+plt.figure(figsize=(6,10))
+
+for cls, color in colors_SBR.items():
+    subset = data_one_way[data_one_way['response_class'] == cls]
+    plt.scatter(subset['modal_mass_prEN_Ch9'], subset['nat_freq_SBR'], color = color, label = cls)
+
+plt.xscale('log')
+plt.yscale('log')
+
+plt.xlabel('Modal Mass')
+plt.ylabel('Natural Frequency')
+plt.title('SBR one-way')
+plt.legend(title='Response Class')
+plt.savefig('SBR_scatter_plot_one_way')
+
+
+colors_prEN = {'I': 'purple', 'II': 'blue', 'III': 'green', 'IV': 'yellow', 'V': 'orange', 'VI': 'red', 'X': 'red'}
+
+plt.figure(figsize=(6,10))
+
+for cls, color in colors_prEN.items():
+    subset = data_one_way[data_one_way['comfort_class'] == cls]
+    plt.scatter(subset['modal_mass_prEN_Ch9'], subset['nat_freq_SBR'], color = color, label = cls)
+
+plt.xscale('log')
+plt.yscale('log')
+
+plt.xlabel('Modal Mass')
+plt.ylabel('Natural Frequency')
+plt.title('prEN Chapter 9 - one-way')
+plt.legend(title='Response Class')
+plt.savefig('prEN_Ch9_scatter_plot_one_way')
+
+
+## TWO-WAY
+
+plt.figure(figsize=(6,10))
+
+for cls, color in colors_SBR.items():
+    subset = data_two_way[data_two_way['response_class'] == cls]
+    plt.scatter(subset['modal_mass_prEN_Ch9'], subset['nat_freq_SBR'], color = color, label = cls)
+
+plt.xscale('log')
+plt.yscale('log')
+
+plt.xlabel('Modal Mass')
+plt.ylabel('Natural Frequency')
+plt.title('SBR one-way')
+plt.legend(title='Response Class')
+plt.savefig('SBR_scatter_plot_one_way')
+
+
+plt.figure(figsize=(6,10))
+
+for cls, color in colors_prEN.items():
+    subset = data_two_way[data_two_way['comfort_class'] == cls]
+    plt.scatter(subset['modal_mass_prEN_Ch9'], subset['nat_freq_SBR'], color = color, label = cls)
+
+plt.xscale('log')
+plt.yscale('log')
+
+plt.xlabel('Modal Mass')
+plt.ylabel('Natural Frequency')
+plt.title('prEN Chapter 9 - two-way')
+plt.legend(title='Response Class')
+plt.savefig('prEN_Ch9_scatter_plot_one_way')
+
+plt.show()
+
+
 # if 'modal_masses_per' in data_one_way.columns:
 #
 #     first_modal_masses = []
