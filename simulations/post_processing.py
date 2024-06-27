@@ -5,6 +5,7 @@ import numpy as np
 
 data_one_way = pd.read_excel('data_one_way_i3.xlsx')
 data_two_way = pd.read_excel('data_two_way_i4.xlsx')
+data_one_way_continuous = pd.read_excel('data_one_way_continuous.xlsx')
 
 # HISTOGRAMS MODAL MASS
 # ONE-WAY DATA
@@ -68,7 +69,7 @@ if 'modal_masses_per' in data_one_way.columns and 'floor_width' in data_one_way.
         fig.delaxes(axes[i])
 
     plt.tight_layout()
-    plt.savefig('Modal_mass_distribution_one_way')
+    # plt.savefig('Modal_mass_distribution_one_way')
     # plt.show()
 
 
@@ -136,8 +137,76 @@ if 'modal_masses_per' in data_two_way.columns and 'floor_width' in data_two_way.
         fig.delaxes(axes[i])
 
     plt.tight_layout()
-    plt.savefig('Modal_mass_distribution_two_way')
+    # plt.savefig('Modal_mass_distribution_two_way')
     # plt.show()
+
+else:
+    print("'modal_masses_per' or 'floor_width' column not found in the DataFrame.")
+
+# ONE-WAY CONTINUOUS
+
+if 'modal_masses_per' in data_one_way_continuous.columns and 'floor_width' in data_one_way_continuous.columns:
+    # Parse 'modal_masses_per' as lists if they are string representations
+    data_one_way_continuous['parsed_modal_masses'] = data_one_way_continuous['modal_masses_per'].apply(
+        lambda x: ast.literal_eval(x) if isinstance(x, str) else x
+    )
+    def get_first_element(lst):
+        if isinstance(lst, list) and len(lst) > 0:
+            return lst[0]
+        return None
+
+    data_one_way_continuous['first_modal_mass'] = data_one_way_continuous['parsed_modal_masses'].apply(get_first_element)
+
+    data_one_way_continuous = data_one_way_continuous.dropna(subset=['first_modal_mass'])
+
+    unique_floor_widths = data_one_way_continuous['floor_width'].unique()
+
+    unique_floor_widths.sort()
+
+    all_first_modal_masses = data_one_way_continuous['first_modal_mass'].dropna().tolist()
+    x_min = min(all_first_modal_masses)
+    x_max = max(all_first_modal_masses)
+
+    max_y = 0  # Initialize max_y to zero
+
+    num_unique = len(unique_floor_widths)
+
+    for floor_width in unique_floor_widths:
+        subset = data_one_way_continuous[data_one_way_continuous['floor_width'] == floor_width]
+        first_modal_masses = subset['first_modal_mass'].dropna().tolist()
+
+        counts, bins = np.histogram(first_modal_masses, bins=10)
+
+        if counts.max() > max_y:
+            max_y = counts.max()
+
+    n_cols = 2  # Number of columns in the subplot grid
+    n_rows = (num_unique // n_cols) + (num_unique % n_cols > 0)  # Calculate number of rows needed
+
+    fig, axes = plt.subplots(n_rows, n_cols, figsize=(15, n_rows * 5))  # Adjust size as necessary
+
+    axes = axes.flatten()
+
+    for idx, floor_width in enumerate(unique_floor_widths):
+        subset = data_one_way_continuous[data_one_way_continuous['floor_width'] == floor_width]
+
+        first_modal_masses = subset['first_modal_mass'].dropna().tolist()
+
+        axes[idx].hist(first_modal_masses, bins=10, edgecolor='black')
+        axes[idx].set_title(f'Floor Width: {floor_width:.1f}')
+        axes[idx].set_xlabel('Modal mass first mode (%)')
+        axes[idx].set_ylabel('Frequency')
+        axes[idx].set_xlim(x_min, x_max)  # Set the same x-axis range for each plot
+        axes[idx].set_ylim(0, max_y)  # Set the same y-axis range for each plot
+        axes[idx].grid(True)
+
+    for i in range(num_unique, len(axes)):
+        fig.delaxes(axes[i])
+
+    plt.tight_layout()
+    plt.savefig('Modal_mass_distribution_one_way_continuous')
+    # plt.show()
+
 
 else:
     print("'modal_masses_per' or 'floor_width' column not found in the DataFrame.")

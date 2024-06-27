@@ -33,7 +33,7 @@ shear_strength = 0.8 * 4 / 1.25 # k_mod * f_v,090,ylay,k / gamma_m
 # ANALYTICAL FORMULATIONS FOR MODAL PROPERTIES
 
 def define_span_type(row):
-    span_type = 'two-way' # as defined in prEN for CLT floors
+    span_type = 'one-way' # as defined in prEN for CLT floors
 
     return span_type
 
