@@ -240,4 +240,41 @@ def compute_R_arms_gov(row):
 
 df_full['R_rms_gov'] = df_full.apply(compute_R_arms_gov, axis = 1)
 
-print(df_full)
+
+comfort_limits = {
+    'R_min_lim': [0.0, 4.0, 8.0, 12.0, 24.0, 36.0, 48.0],
+    'R_max_lim': [4.0, 8.0, 12.0, 24.0, 36.0, 48.0, 1000.0],
+    'w_lim_max': [0.25, 0.25, 0.5, 1.0, 1.5, 2.0, 2.0]
+}
+
+response_classes = ['I', 'II', 'III', 'IV', 'V', 'VI', 'X']
+
+prEN_limits = pd.DataFrame(comfort_limits, index = response_classes)
+
+
+def process_R_rms_gov(row):
+    value = row['R_rms_gov']
+
+    if isinstance(value, list):
+        R_max_Annex_G = max(value)
+
+    elif isinstance(value, float):
+        R_max_Annex_G = value
+
+    else:
+        R_max_Annex_G = np.nan
+
+    comfort_class = None
+
+    if pd.notna(R_max_Annex_G):
+        for cls, limits in prEN_limits.iterrows():
+            if limits['R_min_lim'] <= R_max_Annex_G < limits['R_max_lim']:
+                comfort_class = cls
+                break
+
+    return pd.Series({'R_max_Annex_G': R_max_Annex_G, 'comfort_class_Annex_G': comfort_class})
+
+df_full[['R_max_Annex_G', 'comfort_class_Annex_G']] = df_full.apply(process_R_rms_gov, axis=1)
+
+# print(df_full)
+
