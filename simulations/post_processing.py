@@ -408,7 +408,7 @@ else:
 
 
 
-# FULL PLOTS
+# FULL COLOR PLOTS
 
 ## ONE-WAY
 colors_SBR = {'A': 'purple', 'B': 'blue', 'C': 'green', 'D': 'yellow', 'E': 'orange', 'F': 'red'}
