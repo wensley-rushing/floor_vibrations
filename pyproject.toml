@@ -1,0 +1,12 @@
+[project]
+name="floor_vibrarions"
+
+dependencies=[
+"opensees",
+"quakeio",
+"mdof",
+"numpy",
+"pandas",
+"matplotlib",
+"keras"
+]
