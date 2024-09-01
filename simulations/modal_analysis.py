@@ -1,6 +1,6 @@
 import pandas as pd
 import numpy as np
-import openseespy.opensees as ops
+import opensees.openseespy as ops
 import matplotlib.pyplot as plt
 
 from prEN_Chapter_9 import filtered_database_full_prEN_ch9 as data

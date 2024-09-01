@@ -11,7 +11,7 @@ from scipy.interpolate import interp1d
 import time
 from itertools import count
 from collections import defaultdict
-import openseespy.opensees as ops
+import opensees.openseespy as ops
 
 def single_span(plate,L,B):
     return np.pi / 2 * np.sqrt(plate.EIx/(plate.rho*L**4))
