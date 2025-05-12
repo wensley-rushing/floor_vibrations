@@ -4,6 +4,8 @@ name="floor_vibrarions"
 dependencies=[
 "opensees",
 "quakeio",
+"veux",
+"xara",
 "mdof",
 "numpy",
 "pandas",
