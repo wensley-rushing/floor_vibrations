@@ -1,6 +1,6 @@
 import pandas as pd
 import numpy as np
-import opensees.openseespy as ops
+import xara as ops
 import matplotlib.pyplot as plt
 from itertools import count
 from collections import defaultdict

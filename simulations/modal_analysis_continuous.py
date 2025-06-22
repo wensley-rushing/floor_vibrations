@@ -31,7 +31,6 @@ def model_two_way(floor_span, floor_width, thickness, mass_per_area, E_long, E_t
 
         xx, yy = np.meshgrid(x, y)
 
-        ops.wipe()
         ops.model('basic', '-ndm', 3, '-ndf', 6)
 
         nums = (np.arange(0, len(xx.flatten())) + 1).reshape(xx.shape)
@@ -184,45 +183,47 @@ def model_two_way(floor_span, floor_width, thickness, mass_per_area, E_long, E_t
         print(f"An error occurred: {e}")
         return None, None
 
-# Iterate over the dummy data and apply the model
-# for index, row in dummy_data.iterrows():
-#    floor_span = row['floor_span']
-#    floor_width = row['floor_width']
-#    thickness = row['dikte']
-#    mass_per_area = row['acting_mass']
-#
-#    frequencies, modal_masses = model_two_way(floor_span, floor_width, thickness, mass_per_area, output=True)
-#    if frequencies is not None and modal_masses is not None:
-#        for mode in range(len(frequencies)):
-#            print(f"Mode {mode + 1}: Frequency = {frequencies[mode]:.2f} Hz, Modal Mass = {modal_masses[mode] * 100:.1f}%")
 
-freq_lists = []
-mass_lists = []
+if __name__ == "__main__":
+    # Iterate over the dummy data and apply the model
+    # for index, row in dummy_data.iterrows():
+    #    floor_span = row['floor_span']
+    #    floor_width = row['floor_width']
+    #    thickness = row['dikte']
+    #    mass_per_area = row['acting_mass']
+    #
+    #    frequencies, modal_masses = model_two_way(floor_span, floor_width, thickness, mass_per_area, output=True)
+    #    if frequencies is not None and modal_masses is not None:
+    #        for mode in range(len(frequencies)):
+    #            print(f"Mode {mode + 1}: Frequency = {frequencies[mode]:.2f} Hz, Modal Mass = {modal_masses[mode] * 100:.1f}%")
 
-for index, row in dummy_data.iterrows():
-    floor_span = row['floor_span']
-    floor_width = row['floor_width']
-    thickness = row['dikte']
-    mass_per_area = row['acting_mass']
-    E_long = row['E_longitudinal']
-    E_trans = row['E_transverse']
+    freq_lists = []
+    mass_lists = []
+
+    for index, row in dummy_data.iterrows():
+        floor_span = row['floor_span']
+        floor_width = row['floor_width']
+        thickness = row['dikte']
+        mass_per_area = row['acting_mass']
+        E_long = row['E_longitudinal']
+        E_trans = row['E_transverse']
 
 
-    frequencies, modal_masses = model_two_way(floor_span, floor_width, thickness, mass_per_area, E_long, E_trans, output=True)
-    if frequencies is not None and modal_masses is not None:
-        freq_lists.append(frequencies.tolist())
-        mass_lists.append(list(modal_masses.values()))
+        frequencies, modal_masses = model_two_way(floor_span, floor_width, thickness, mass_per_area, E_long, E_trans, output=True)
+        if frequencies is not None and modal_masses is not None:
+            freq_lists.append(frequencies.tolist())
+            mass_lists.append(list(modal_masses.values()))
 
-        for mode in range(len(frequencies)):
-            print(f"Mode {mode + 1}: Frequency = {frequencies[mode]:.2f} Hz, Modal Mass = {modal_masses[mode] * 100:.1f}%")
+            for mode in range(len(frequencies)):
+                print(f"Mode {mode + 1}: Frequency = {frequencies[mode]:.2f} Hz, Modal Mass = {modal_masses[mode] * 100:.1f}%")
 
-# Append the lists to the DataFrame
-dummy_data.loc[:, 'frequencies'] = freq_lists
-dummy_data.loc[:, 'modal_masses_per'] = mass_lists
+    # Append the lists to the DataFrame
+    dummy_data.loc[:, 'frequencies'] = freq_lists
+    dummy_data.loc[:, 'modal_masses_per'] = mass_lists
 
-dummy_data['modal_masses'] = dummy_data.apply(
-    lambda row: [mass_perc * row['floor_width'] * row['floor_span'] * row['acting_mass'] for mass_perc in row['modal_masses_per']], axis=1
-)
+    dummy_data['modal_masses'] = dummy_data.apply(
+        lambda row: [mass_perc * row['floor_width'] * row['floor_span'] * row['acting_mass'] for mass_perc in row['modal_masses_per']], axis=1
+    )
 
-print(dummy_data)
+    print(dummy_data)
 
